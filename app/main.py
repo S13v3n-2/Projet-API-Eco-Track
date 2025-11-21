@@ -140,14 +140,6 @@ async def upload_csv(
 
     return {"message": f"{indicators_created} indicateurs créés avec succès"}
 
-# Nouvelle route pour les statistiques détaillées
-@app.get("/stats/air/quality")
-def get_air_quality_stats(
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_active_user)
-):
-    return crud.get_air_quality_stats(db)
-
 @app.get("/")
 def read_root():
     return {"message": "Bienvenue sur EcoTrack API", "version": "1.0.0"}
