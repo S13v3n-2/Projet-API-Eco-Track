@@ -44,47 +44,60 @@ const dashboard = {
         }
     },
 
-    // Chargement des indicateurs
-    loadIndicators: async function() {
-        const typeFilter = document.getElementById('filter-type').value;
-        const zoneFilter = document.getElementById('filter-zone').value;
-        const limit = document.getElementById('filter-limit').value;
-        const startDate = document.getElementById('filter-start-date').value;
-        const endDate = document.getElementById('filter-end-date').value;
+// Chargement des indicateurs - CORRIGÉ
+loadIndicators: async function() {
+    const typeFilter = document.getElementById('filter-type').value;
+    const zoneFilter = document.getElementById('filter-zone').value;
+    const limit = document.getElementById('filter-limit').value;
+    const startDate = document.getElementById('filter-start-date').value;
+    const endDate = document.getElementById('filter-end-date').value;
 
-        document.getElementById('indicators-loading').style.display = 'block';
-        document.getElementById('indicators-list').innerHTML = '';
+    document.getElementById('indicators-loading').style.display = 'block';
+    document.getElementById('indicators-list').innerHTML = '';
 
-        try {
-            let url = `${App.API_BASE}/indicators/?limit=${limit}`;
-            if (typeFilter) url += `&type=${typeFilter}`;
-            if (zoneFilter) url += `&zone_id=${zoneFilter}`;
+    try {
+        // Construction de l'URL avec tous les paramètres
+        let url = `${App.API_BASE}/indicators/?limit=${limit}`;
 
-            const response = await App.apiRequest(url);
-
-            if (response.ok) {
-                let indicators = await response.json();
-
-                // Filtrage côté client par date (temporaire)
-                if (startDate && endDate) {
-                    indicators = indicators.filter(ind => {
-                        const indDate = new Date(ind.timestamp).toISOString().split('T')[0];
-                        return indDate >= startDate && indDate <= endDate;
-                    });
-                }
-
-                this.displayIndicators(indicators);
-            } else if (response.status === 401) {
-                auth.logout();
-                App.showMessage('Session expirée - Veuillez vous reconnecter', 'error');
-            }
-        } catch (error) {
-            console.error('Error loading indicators:', error);
-            App.showMessage('Erreur lors du chargement des indicateurs', 'error');
-        } finally {
-            document.getElementById('indicators-loading').style.display = 'none';
+        // CORRECTION : Ne pas envoyer le paramètre type si c'est "Tous les types"
+        if (typeFilter && typeFilter !== "") {
+            url += `&type=${encodeURIComponent(typeFilter)}`;
         }
-    },
+
+        if (zoneFilter && zoneFilter !== "") {
+            url += `&zone_id=${encodeURIComponent(zoneFilter)}`;
+        }
+
+        // CORRECTION : Toujours envoyer les dates, même si vides
+        if (startDate) {
+            url += `&start_date=${encodeURIComponent(startDate)}`;
+        }
+        if (endDate) {
+            url += `&end_date=${encodeURIComponent(endDate)}`;
+        }
+
+        console.log("🔍 Requête API:", url); // Debug
+
+        const response = await App.apiRequest(url);
+
+        if (response.ok) {
+            const indicators = await response.json();
+            console.log(`✅ ${indicators.length} indicateurs chargés`); // Debug
+            this.displayIndicators(indicators);
+        } else if (response.status === 401) {
+            auth.logout();
+            App.showMessage('Session expirée - Veuillez vous reconnecter', 'error');
+        } else {
+            console.error('Erreur API:', response.status, response.statusText);
+            App.showMessage('Erreur API: ' + response.status, 'error');
+        }
+    } catch (error) {
+        console.error('Error loading indicators:', error);
+        App.showMessage('Erreur lors du chargement des indicateurs: ' + error.message, 'error');
+    } finally {
+        document.getElementById('indicators-loading').style.display = 'none';
+    }
+},
 
     // Affichage des indicateurs
     displayIndicators: function(indicators) {
@@ -187,5 +200,48 @@ const dashboard = {
             return '<span class="quality-badge quality-poor">MAUVAIS</span>';
         }
         return '';
+    },
+    // Ajouter cette fonction à l'objet dashboard
+showTab: function(tabName) {
+    // Cacher tous les contenus d'onglets
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.style.display = 'none';
+    });
+
+    // Désactiver tous les boutons d'onglets
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Afficher l'onglet sélectionné
+    document.getElementById(`tab-${tabName}`).style.display = 'block';
+    event.target.classList.add('active');
+
+    // Charger les données si nécessaire
+    if (tabName === 'admin') {
+        admin.loadUsers();
     }
+    },
+
+    // Modifier la fonction showDashboard pour gérer l'admin
+    showDashboard: function() {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('user-header').style.display = 'block';
+        document.getElementById('user-info').style.display = 'block';
+
+        const email = document.getElementById('email').value || 'admin@ecotrack.com';
+        document.getElementById('user-info').innerHTML = `
+            <strong>👤 Connecté en tant que:</strong> ${email}
+        `;
+
+        // Afficher l'onglet admin si l'utilisateur est admin
+        if (App.currentUser && App.currentUser.role === 'admin') {
+            document.getElementById('admin-tab').style.display = 'block';
+        }
+
+        this.loadZones();
+        this.loadIndicators();
+    },
+
 };

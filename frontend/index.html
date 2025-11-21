@@ -60,97 +60,154 @@
         <div class="card" id="dashboard" style="display: none;">
             <h2>📊 Tableau de bord</h2>
 
-            <!-- Filtres -->
-            <div class="filter-section">
-                <h3>🔍 Filtres des données</h3>
+            <!-- Navigation -->
+            <div class="nav-tabs">
+                <button class="tab-btn active" onclick="dashboard.showTab('indicators')">📈 Indicateurs</button>
+                <button class="tab-btn" onclick="dashboard.showTab('stats')">📊 Statistiques</button>
+                <button class="tab-btn" id="admin-tab" style="display: none;" onclick="dashboard.showTab('admin')">👨‍💼 Administration</button>
+            </div>
 
-                <!-- Filtres par date -->
+            <!-- Section Indicateurs -->
+            <div id="tab-indicators" class="tab-content">
+                <!-- Filtres -->
+                <div class="filter-section">
+                    <h3>🔍 Filtres des données</h3>
+
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label>Date de début:</label>
+                            <input type="date" id="filter-start-date" onchange="filters.updateDateFilters()">
+                        </div>
+                        <div class="filter-group">
+                            <label>Date de fin:</label>
+                            <input type="date" id="filter-end-date" onchange="filters.updateDateFilters()">
+                        </div>
+                        <div class="filter-group">
+                            <label>Période rapide:</label>
+                            <select id="filter-period" onchange="filters.applyQuickPeriod()">
+                                <option value="">Personnalisée</option>
+                                <option value="today">Aujourd'hui</option>
+                                <option value="yesterday">Hier</option>
+                                <option value="week">Cette semaine</option>
+                                <option value="month">Ce mois</option>
+                                <option value="year">Cette année</option>
+                                <option value="last7days">7 derniers jours</option>
+                                <option value="last30days">30 derniers jours</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label>Type d'indicateur:</label>
+                            <select id="filter-type" onchange="dashboard.loadIndicators()">
+                                <option value="">Tous les types</option>
+                                <option value="air_quality_pm25">PM2.5</option>
+                                <option value="air_quality_pm10">PM10</option>
+                                <option value="air_quality_no2">NO2</option>
+                                <option value="co2">CO2</option>
+                                <option value="temperature">Température</option>
+                                <option value="humidity">Humidité</option>
+                                <option value="waste_production">Déchets</option>
+                                <option value="energy_consumption">Énergie</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Zone:</label>
+                            <select id="filter-zone" onchange="dashboard.loadIndicators()">
+                                <option value="">Toutes les zones</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Limite:</label>
+                            <select id="filter-limit" onchange="dashboard.loadIndicators()">
+                                <option value="10">10 résultats</option>
+                                <option value="25" selected>25 résultats</option>
+                                <option value="50">50 résultats</option>
+                                <option value="100">100 résultats</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-warning" onclick="filters.resetFilters()">🔄 Réinitialiser les filtres</button>
+                </div>
+
+                <!-- Indicateurs récents -->
+                <h3>📈 Indicateurs récents</h3>
+                <div id="indicators-container">
+                    <div class="loading" id="indicators-loading">Chargement des indicateurs...</div>
+                    <div class="indicators-grid" id="indicators-list"></div>
+                </div>
+            </div>
+
+            <!-- Section Statistiques -->
+            <div id="tab-stats" class="tab-content" style="display: none;">
+                <h3>📊 Statistiques qualité de l'air</h3>
                 <div class="filter-row">
                     <div class="filter-group">
-                        <label>Date de début:</label>
-                        <input type="date" id="filter-start-date" onchange="filters.updateDateFilters()">
+                        <label>Date début stats:</label>
+                        <input type="date" id="stats-start-date" value="2024-01-01">
                     </div>
                     <div class="filter-group">
-                        <label>Date de fin:</label>
-                        <input type="date" id="filter-end-date" onchange="filters.updateDateFilters()">
+                        <label>Date fin stats:</label>
+                        <input type="date" id="stats-end-date" value="2024-12-31">
                     </div>
                     <div class="filter-group">
-                        <label>Période rapide:</label>
-                        <select id="filter-period" onchange="filters.applyQuickPeriod()">
-                            <option value="">Personnalisée</option>
-                            <option value="today">Aujourd'hui</option>
-                            <option value="yesterday">Hier</option>
-                            <option value="week">Cette semaine</option>
-                            <option value="month">Ce mois</option>
-                            <option value="year">Cette année</option>
-                            <option value="last7days">7 derniers jours</option>
-                            <option value="last30days">30 derniers jours</option>
-                        </select>
+                        <label>&nbsp;</label>
+                        <button class="btn btn-success" onclick="dashboard.loadAirStats()">📊 Charger les statistiques</button>
                     </div>
                 </div>
-
-                <!-- Filtres par type et zone -->
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label>Type d'indicateur:</label>
-                        <select id="filter-type" onchange="dashboard.loadIndicators()">
-                            <option value="">Tous les types</option>
-                            <option value="air_quality_pm25">PM2.5</option>
-                            <option value="air_quality_pm10">PM10</option>
-                            <option value="air_quality_no2">NO2</option>
-                            <option value="co2">CO2</option>
-                            <option value="temperature">Température</option>
-                            <option value="humidity">Humidité</option>
-                            <option value="waste_production">Déchets</option>
-                            <option value="energy_consumption">Énergie</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Zone:</label>
-                        <select id="filter-zone" onchange="dashboard.loadIndicators()">
-                            <option value="">Toutes les zones</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Limite:</label>
-                        <select id="filter-limit" onchange="dashboard.loadIndicators()">
-                            <option value="10">10 résultats</option>
-                            <option value="25" selected>25 résultats</option>
-                            <option value="50">50 résultats</option>
-                            <option value="100">100 résultats</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button class="btn btn-warning" onclick="filters.resetFilters()">🔄 Réinitialiser les filtres</button>
-            </div>
-
-            <!-- Indicateurs récents -->
-            <h3>📈 Indicateurs récents</h3>
-            <div id="indicators-container">
-                <div class="loading" id="indicators-loading">Chargement des indicateurs...</div>
-                <div class="indicators-grid" id="indicators-list"></div>
-            </div>
-
-            <!-- Statistiques qualité de l'air -->
-            <h3>📊 Statistiques qualité de l'air</h3>
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label>Date début stats:</label>
-                    <input type="date" id="stats-start-date" value="2024-01-01">
-                </div>
-                <div class="filter-group">
-                    <label>Date fin stats:</label>
-                    <input type="date" id="stats-end-date" value="2024-12-31">
-                </div>
-                <div class="filter-group">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-success" onclick="dashboard.loadAirStats()">📊 Charger les statistiques</button>
+                <div id="stats-container">
+                    <div class="loading" id="stats-loading" style="display: none;">Calcul des statistiques...</div>
+                    <div class="stats-container" id="air-stats"></div>
                 </div>
             </div>
-            <div id="stats-container">
-                <div class="loading" id="stats-loading" style="display: none;">Calcul des statistiques...</div>
-                <div class="stats-container" id="air-stats"></div>
+
+            <!-- NOUVELLE SECTION ADMIN -->
+            <div id="tab-admin" class="tab-content" style="display: none;">
+                <h3>👨‍💼 Gestion des utilisateurs</h3>
+
+                <div class="admin-actions">
+                    <button class="btn btn-success" onclick="admin.loadUsers()">🔄 Actualiser</button>
+                    <button class="btn btn-primary" onclick="admin.showCreateUserForm()">➕ Nouvel utilisateur</button>
+                </div>
+
+                <!-- Liste des utilisateurs -->
+                <div id="users-loading" class="loading">Chargement des utilisateurs...</div>
+                <div id="users-list" class="users-grid"></div>
+
+                <!-- Formulaire de création d'utilisateur -->
+                <div id="create-user-form" style="display: none; margin-top: 20px;">
+                    <h4>Créer un nouvel utilisateur</h4>
+                    <div class="form-group">
+                        <label>Nom complet:</label>
+                        <input type="text" id="new-user-name" placeholder="Nom complet">
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" id="new-user-email" placeholder="email@exemple.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Mot de passe:</label>
+                        <input type="password" id="new-user-password" placeholder="Mot de passe">
+                    </div>
+                    <div class="form-group">
+                        <label>Rôle:</label>
+                        <select id="new-user-role">
+                            <option value="user">Utilisateur</option>
+                            <option value="admin">Administrateur</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Statut:</label>
+                        <select id="new-user-active">
+                            <option value="true">Actif</option>
+                            <option value="false">Inactif</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success" onclick="admin.createUser()">Créer l'utilisateur</button>
+                    <button class="btn btn-warning" onclick="admin.hideCreateUserForm()">Annuler</button>
+                </div>
             </div>
         </div>
 
@@ -163,5 +220,6 @@
     <script src="js/auth.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/dashboard.js"></script>
+    <script src="js/admin.js"></script> <!-- NOUVEAU FICHIER ADMIN -->
 </body>
 </html>
