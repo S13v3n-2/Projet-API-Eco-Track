@@ -5,8 +5,9 @@ from typing import List, Optional
 import csv
 import io
 
-from . import models, schemas, crud, auth
-from .database import SessionLocal, engine
+from . import models, schemas, crud
+from .auth import get_current_active_user, get_current_admin_user, get_db, authenticate_user, create_access_token
+from .database import engine
 from .core.config import settings
 
 # Créer les tables
@@ -28,15 +29,6 @@ app.add_middleware(
 )
 
 
-# Dépendance de base de données
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
 # Routes d'authentification
 @app.post("/auth/register", response_model=schemas.User)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -48,10 +40,10 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @app.post("/auth/login")
 def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
-    db_user = auth.authenticate_user(db, user.email, user.password)
+    db_user = authenticate_user(db, user.email, user.password)
     if not db_user:
         raise HTTPException(status_code=400, detail="Email ou mot de passe incorrect")
-    return auth.create_access_token(data={"sub": db_user.email})
+    return create_access_token(data={"sub": db_user.email})
 
 
 # Routes pour les indicateurs
@@ -62,7 +54,7 @@ def read_indicators(
         type: Optional[str] = None,
         zone_id: Optional[int] = None,
         db: Session = Depends(get_db),
-        current_user: models.User = Depends(auth.get_current_active_user)
+        current_user: models.User = Depends(get_current_active_user)
 ):
     if type:
         return crud.get_indicators_by_type(db, indicator_type=type)
@@ -76,7 +68,7 @@ def read_indicators(
 def create_indicator(
         indicator: schemas.IndicatorCreate,
         db: Session = Depends(get_db),
-        current_user: models.User = Depends(auth.get_current_active_user)
+        current_user: models.User = Depends(get_current_active_user)
 ):
     return crud.create_indicator(db=db, indicator=indicator, user_id=current_user.id)
 
@@ -87,7 +79,7 @@ def read_zones(
         skip: int = 0,
         limit: int = 100,
         db: Session = Depends(get_db),
-        current_user: models.User = Depends(auth.get_current_active_user)
+        current_user: models.User = Depends(get_current_active_user)
 ):
     return crud.get_zones(db, skip=skip, limit=limit)
 
@@ -98,7 +90,7 @@ def read_sources(
         skip: int = 0,
         limit: int = 100,
         db: Session = Depends(get_db),
-        current_user: models.User = Depends(auth.get_current_active_user)
+        current_user: models.User = Depends(get_current_active_user)
 ):
     return crud.get_sources(db, skip=skip, limit=limit)
 
@@ -110,7 +102,7 @@ def get_air_averages(
         end_date: str,
         zone_id: Optional[int] = None,
         db: Session = Depends(get_db),
-        current_user: models.User = Depends(auth.get_current_active_user)
+        current_user: models.User = Depends(get_current_active_user)
 ):
     return crud.get_air_averages(db, start_date, end_date, zone_id)
 
@@ -120,7 +112,7 @@ def get_air_averages(
 async def upload_csv(
         file: UploadFile = File(...),
         db: Session = Depends(get_db),
-        current_user: models.User = Depends(auth.get_current_admin_user)
+        current_user: models.User = Depends(get_current_admin_user)
 ):
     if not file.filename.endswith('.csv'):
         raise HTTPException(status_code=400, detail="Seuls les fichiers CSV sont acceptés")
@@ -139,7 +131,7 @@ async def upload_csv(
                 timestamp=row.get('timestamp'),
                 zone_id=int(row['zone_id']),
                 source_id=int(row['source_id']),
-                metadata=row.get('metadata')
+                additional_data=row.get('additional_data')
             )
             crud.create_indicator(db, indicator_data, current_user.id)
             indicators_created += 1

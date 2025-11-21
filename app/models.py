@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
-Base = declarative_base()
+from .database import Base
 
 
 class User(Base):
@@ -14,7 +14,7 @@ class User(Base):
     hashed_password = Column(String)
     full_name = Column(String)
     is_active = Column(Boolean, default=True)
-    role = Column(String, default="user")  # user, admin
+    role = Column(String, default="user")
 
     indicators = relationship("Indicator", back_populates="owner")
 
@@ -25,7 +25,7 @@ class Zone(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     postal_code = Column(String)
-    geometry = Column(Text)  # GeoJSON
+    geometry = Column(Text)
 
     indicators = relationship("Indicator", back_populates="zone")
 
@@ -45,18 +45,16 @@ class Indicator(Base):
     __tablename__ = "indicators"
 
     id = Column(Integer, primary_key=True, index=True)
-    type = Column(String, index=True)  # air_quality, co2, energy, waste
+    type = Column(String, index=True)
     value = Column(Float)
     unit = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
-    metadata = Column(Text)  # JSON additional data
+    additional_data = Column(Text)
 
-    # Foreign keys
     zone_id = Column(Integer, ForeignKey("zones.id"))
     source_id = Column(Integer, ForeignKey("sources.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
 
-    # Relationships
     zone = relationship("Zone", back_populates="indicators")
     source = relationship("Source", back_populates="indicators")
     owner = relationship("User", back_populates="indicators")

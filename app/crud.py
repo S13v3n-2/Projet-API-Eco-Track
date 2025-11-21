@@ -80,7 +80,6 @@ def get_air_averages(db: Session, start_date: str, end_date: str, zone_id: Optio
         func.count(models.Indicator.id).label('data_points')
     ).join(models.Indicator.zone)
 
-    # Filtres
     query = query.filter(models.Indicator.type == 'air_quality')
     query = query.filter(models.Indicator.timestamp >= start_date)
     query = query.filter(models.Indicator.timestamp <= end_date)

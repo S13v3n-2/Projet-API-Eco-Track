@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List, Any
+from typing import Optional, List
 from datetime import datetime
 
 
@@ -57,7 +57,7 @@ class IndicatorBase(BaseModel):
     value: float
     unit: str
     timestamp: datetime
-    metadata: Optional[str] = None
+    additional_data: Optional[str] = None
     zone_id: int
     source_id: int
 
