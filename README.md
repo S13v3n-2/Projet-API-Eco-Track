@@ -81,13 +81,13 @@ Suivez les étapes ci-dessous pour configurer l'environnement de développement.
 
 Cloner le dépôt
 
-Bash
+```Bash
 
 git clone https://github.com/votre-username/ecotrack.git
 cd ecotrack
 Créer un environnement virtuel
-
-Bash
+```
+```Bash
 
 # Windows
 python -m venv venv
@@ -97,27 +97,24 @@ venv\Scripts\activate
 python3 -m venv venv
 source venv/bin/activate
 Installer les dépendances
-
-Bash
-
+```
+```Bash
 pip install -r requirements.txt
 Initialiser la base de données Ce script crée les tables nécessaires et configure le compte administrateur par défaut.
-
-Bash
-
+```
+```Bash
 python scripts/init_db.py
 (Optionnel) Peupler la base de données Pour récupérer les données météorologiques et de qualité de l'air initiales :
-
-Bash
-
+```
+```Bash
 python scripts/data_ingestion.py
 Utilisation
 Démarrage du serveur
 Lancez le serveur API avec la commande suivante :
-
-Bash
-
+```
+```Bash
 uvicorn app.main:app --reload
+```
 L'API sera accessible à l'adresse : http://127.0.0.1:8000
 
 Accès au Dashboard
@@ -157,22 +154,42 @@ WAQI (World Air Quality Index) : Données de qualité de l'air (PM2.5, PM10, NO2
 Data.gouv.fr / ADEME : Données simulées pour la consommation énergétique et les émissions de CO2.
 
 Structure du projet
-Plaintext
-
-EcoTrack/
-├── app/
-│   ├── core/           # Configuration globale
-│   ├── auth.py         # Logique d'authentification
-│   ├── crud.py         # Opérations de base de données
-│   ├── database.py     # Configuration SQLAlchemy
-│   ├── main.py         # Point d'entrée de l'application
-│   ├── models.py       # Modèles de données (ORM)
-│   ├── routes.py       # Définition des routes API
-│   └── schemas.py      # Schémas de validation Pydantic
-├── data/               # Stockage de la base SQLite
-├── frontend/           # Interface utilisateur (HTML/JS/CSS)
-├── scripts/            # Scripts utilitaires (init, ingestion)
-└── requirements.txt    # Liste des dépendances
+```Plaintext
+.
+├── README.md                   # Documentation du projet
+├── app                         # Code source principal de l'API Backend
+│   ├── __init__.py
+│   ├── auth.py                 # Gestion de l'authentification et tokens JWT
+│   ├── core                    # Configuration du cœur de l'application
+│   │   ├── __init__.py
+│   │   └── config.py           # Variables d'environnement et paramètres
+│   ├── crud.py                 # Opérations de base de données (Create, Read, Update, Delete)
+│   ├── database.py             # Configuration de la connexion SQLAlchemy
+│   ├── main.py                 # Point d'entrée de l'application FastAPI
+│   ├── models.py               # Définition des modèles de données (Tables)
+│   ├── routes.py               # Définition des endpoints et routeurs API
+│   └── schemas.py              # Schémas Pydantic pour la validation des données
+├── data
+│   └── ecotrack.db             # Fichier de base de données SQLite
+├── frontend                    # Interface utilisateur web
+│   ├── css
+│   │   └── style.css           # Feuilles de style pour le dashboard
+│   ├── index.html              # Page principale unique (Single Page App)
+│   └── js
+│       ├── admin.js            # Logique de gestion des utilisateurs (admin)
+│       ├── app.js              # Configuration globale et utilitaires JS
+│       ├── auth.js             # Gestion de la connexion et inscription
+│       ├── dashboard.js        # Logique d'affichage des indicateurs
+│       ├── data-ingestion.js   # Gestion du déclenchement de l'ingestion
+│       └── filters.js          # Logique de filtrage (dates, zones)
+├── requirements.txt            # Liste des dépendances Python
+└── scripts                     # Scripts utilitaires pour la gestion du projet
+    ├── __init__.py
+    ├── check_database.py       # Script de diagnostic de la base de données
+    ├── data_ingestion.py       # Script backend de récupération des API externes
+    ├── init_db.py              # Script d'initialisation (création tables + admin)
+    └── test.py                 # Script de test rapide
+```
 Auteurs et Licence
 Ce projet a été développé dans le cadre d'un cursus universitaire.
 
