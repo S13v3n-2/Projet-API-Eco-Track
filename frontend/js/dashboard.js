@@ -1,0 +1,191 @@
+// Gestion du tableau de bord
+const dashboard = {
+    // Affichage du tableau de bord
+    showDashboard: function() {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('user-header').style.display = 'block';
+        document.getElementById('user-info').style.display = 'block';
+
+        // Afficher les infos utilisateur
+        const email = document.getElementById('email').value || 'admin@ecotrack.com';
+        document.getElementById('user-info').innerHTML = `
+            <strong>👤 Connecté en tant que:</strong> ${email}
+        `;
+
+        // Charger les données
+        this.loadZones();
+        this.loadIndicators();
+    },
+
+    // Chargement des zones
+    loadZones: async function() {
+        try {
+            const response = await App.apiRequest(`${App.API_BASE}/zones/`);
+
+            if (response.ok) {
+                const zones = await response.json();
+                const zoneSelect = document.getElementById('filter-zone');
+                zoneSelect.innerHTML = '<option value="">Toutes les zones</option>';
+
+                zones.forEach(zone => {
+                    const option = document.createElement('option');
+                    option.value = zone.id;
+                    option.textContent = `${zone.name} (${zone.postal_code})`;
+                    zoneSelect.appendChild(option);
+                });
+            } else if (response.status === 401) {
+                auth.logout();
+                App.showMessage('Session expirée - Veuillez vous reconnecter', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading zones:', error);
+            App.showMessage('Erreur lors du chargement des zones', 'error');
+        }
+    },
+
+    // Chargement des indicateurs
+    loadIndicators: async function() {
+        const typeFilter = document.getElementById('filter-type').value;
+        const zoneFilter = document.getElementById('filter-zone').value;
+        const limit = document.getElementById('filter-limit').value;
+        const startDate = document.getElementById('filter-start-date').value;
+        const endDate = document.getElementById('filter-end-date').value;
+
+        document.getElementById('indicators-loading').style.display = 'block';
+        document.getElementById('indicators-list').innerHTML = '';
+
+        try {
+            let url = `${App.API_BASE}/indicators/?limit=${limit}`;
+            if (typeFilter) url += `&type=${typeFilter}`;
+            if (zoneFilter) url += `&zone_id=${zoneFilter}`;
+
+            const response = await App.apiRequest(url);
+
+            if (response.ok) {
+                let indicators = await response.json();
+
+                // Filtrage côté client par date (temporaire)
+                if (startDate && endDate) {
+                    indicators = indicators.filter(ind => {
+                        const indDate = new Date(ind.timestamp).toISOString().split('T')[0];
+                        return indDate >= startDate && indDate <= endDate;
+                    });
+                }
+
+                this.displayIndicators(indicators);
+            } else if (response.status === 401) {
+                auth.logout();
+                App.showMessage('Session expirée - Veuillez vous reconnecter', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading indicators:', error);
+            App.showMessage('Erreur lors du chargement des indicateurs', 'error');
+        } finally {
+            document.getElementById('indicators-loading').style.display = 'none';
+        }
+    },
+
+    // Affichage des indicateurs
+    displayIndicators: function(indicators) {
+        const list = document.getElementById('indicators-list');
+
+        if (indicators.length === 0) {
+            list.innerHTML = '<div class="loading">Aucun indicateur trouvé pour la période sélectionnée</div>';
+            return;
+        }
+
+        list.innerHTML = indicators.map(ind => {
+            const date = App.formatDate(ind.timestamp);
+            const quality = this.getQualityBadge(ind.type, ind.value);
+
+            return `
+                <div class="indicator-card">
+                    <div class="indicator-type">${this.getIndicatorLabel(ind.type)}</div>
+                    <div class="indicator-value">${ind.value} ${ind.unit}</div>
+                    <div class="indicator-meta">
+                        📍 Zone: ${ind.zone_id} | 📅 ${date}
+                        ${quality}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    // Chargement des statistiques
+    loadAirStats: async function() {
+        const startDate = document.getElementById('stats-start-date').value;
+        const endDate = document.getElementById('stats-end-date').value;
+
+        document.getElementById('stats-loading').style.display = 'block';
+        document.getElementById('air-stats').innerHTML = '';
+
+        try {
+            const response = await App.apiRequest(
+                `${App.API_BASE}/stats/air/averages?start_date=${startDate}&end_date=${endDate}`
+            );
+
+            if (response.ok) {
+                const stats = await response.json();
+                this.displayAirStats(stats);
+            } else if (response.status === 401) {
+                auth.logout();
+                App.showMessage('Session expirée - Veuillez vous reconnecter', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
+            App.showMessage('Erreur lors du chargement des statistiques', 'error');
+        } finally {
+            document.getElementById('stats-loading').style.display = 'none';
+        }
+    },
+
+    // Affichage des statistiques
+    displayAirStats: function(stats) {
+        const statsDiv = document.getElementById('air-stats');
+
+        if (stats.length === 0) {
+            statsDiv.innerHTML = '<div class="loading">Aucune statistique disponible pour la période sélectionnée</div>';
+            return;
+        }
+
+        statsDiv.innerHTML = stats.map(stat => `
+            <div class="stat-card">
+                <div class="stat-label">${stat.zone_name}</div>
+                <div class="stat-value">${stat.average_quality.toFixed(1)} µg/m³</div>
+                <div class="stat-label">${stat.data_points} mesures</div>
+                <div class="stat-label">${stat.period || ''}</div>
+            </div>
+        `).join('');
+    },
+
+    // Libellés des indicateurs
+    getIndicatorLabel: function(type) {
+        const labels = {
+            'air_quality_pm25': '🟡 PM2.5',
+            'air_quality_pm10': '🟠 PM10',
+            'air_quality_no2': '🔴 NO2',
+            'co2': '💨 CO2',
+            'temperature': '🌡️ Température',
+            'humidity': '💧 Humidité',
+            'waste_production': '🗑️ Déchets',
+            'energy_consumption': '⚡ Énergie'
+        };
+        return labels[type] || type;
+    },
+
+    // Badges de qualité
+    getQualityBadge: function(type, value) {
+        if (type === 'air_quality_pm25') {
+            if (value <= 15) return '<span class="quality-badge quality-good">BON</span>';
+            if (value <= 25) return '<span class="quality-badge quality-moderate">MOYEN</span>';
+            return '<span class="quality-badge quality-poor">MAUVAIS</span>';
+        }
+        if (type === 'air_quality_pm10') {
+            if (value <= 20) return '<span class="quality-badge quality-good">BON</span>';
+            if (value <= 35) return '<span class="quality-badge quality-moderate">MOYEN</span>';
+            return '<span class="quality-badge quality-poor">MAUVAIS</span>';
+        }
+        return '';
+    }
+};
