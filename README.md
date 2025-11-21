@@ -108,7 +108,7 @@ pip install -r requirements.txt
 python scripts/init_db.py
 ```
 
-### (Optionnel) Peupler la base de données
+### Peupler la base de données
 
 ``` bash
 python scripts/data_ingestion.py
