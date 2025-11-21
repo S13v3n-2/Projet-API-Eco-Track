@@ -67,12 +67,24 @@ def read_indicators(
         db: Session = Depends(get_db),
         current_user: models.User = Depends(get_current_active_user)
 ):
-    start_dt = datetime.fromisoformat(start_date) if start_date else None
-    end_dt = datetime.fromisoformat(end_date) if end_date else None
+    """Récupère les indicateurs avec filtres optionnels"""
+    print(f"🔍 Filtres reçus - type: {type}, zone: {zone_id}, start: {start_date}, end: {end_date}, limit: {limit}")
+
+    start_dt = None
+    end_dt = None
+
+    try:
+        if start_date:
+            start_dt = datetime.fromisoformat(start_date)
+        if end_date:
+            end_dt = datetime.fromisoformat(end_date)
+    except Exception as e:
+        print(f"❌ Erreur conversion dates: {e}")
+        # Continuer sans les dates en cas d'erreur
 
     filter_type = type if type and type.strip() != "" else None
 
-    return crud.get_indicators(
+    indicators = crud.get_indicators(
         db,
         type=filter_type,
         zone_id=zone_id,
@@ -80,6 +92,9 @@ def read_indicators(
         end_date=end_dt,
         limit=limit
     )
+
+    print(f"✅ {len(indicators)} indicateurs trouvés")
+    return indicators
 
 
 @app.post("/indicators/", response_model=schemas.Indicator)
@@ -147,7 +162,9 @@ def get_all_users(
         current_user: models.User = Depends(get_current_admin_user)
 ):
     """Récupère tous les utilisateurs (admin seulement)"""
-    return crud.get_users(db, skip=skip, limit=limit)
+    users = crud.get_users(db, skip=skip, limit=limit)
+    print(f"👥 {len(users)} utilisateurs récupérés")
+    return users
 
 
 @app.get("/admin/users/{user_id}", response_model=schemas.User)
@@ -194,6 +211,16 @@ def delete_user(
     if not success:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     return {"message": "Utilisateur supprimé avec succès"}
+
+
+# Route pour récupérer l'utilisateur courant
+@app.get("/admin/users/me", response_model=schemas.User)
+def get_current_user_info(
+        current_user: models.User = Depends(get_current_active_user)
+):
+    """Récupère les informations de l'utilisateur connecté"""
+    print(f"👤 Utilisateur courant demandé: {current_user.email} (role: {current_user.role})")
+    return current_user
 
 
 # Upload CSV

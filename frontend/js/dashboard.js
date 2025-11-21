@@ -1,21 +1,67 @@
 // Gestion du tableau de bord
 const dashboard = {
-    // Affichage du tableau de bord
+    // Affichage du tableau de bord - CORRIGÉE
     showDashboard: function() {
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         document.getElementById('user-header').style.display = 'block';
         document.getElementById('user-info').style.display = 'block';
 
-        // Afficher les infos utilisateur
         const email = document.getElementById('email').value || 'admin@ecotrack.com';
-        document.getElementById('user-info').innerHTML = `
-            <strong>👤 Connecté en tant que:</strong> ${email}
-        `;
 
-        // Charger les données
+        // AFFICHAGE AMÉLIORÉ avec rôle
+        let userInfoHtml = `<strong>👤 Connecté en tant que:</strong> ${email}`;
+        if (App.currentUser) {
+            userInfoHtml += ` | <strong>Rôle:</strong> ${App.currentUser.role}`;
+            if (App.currentUser.role === 'admin') {
+                userInfoHtml += ' 👑';
+            }
+        }
+
+        document.getElementById('user-info').innerHTML = userInfoHtml;
+
+        // AFFICHER L'ONGLET ADMIN SI UTILISATEUR EST ADMIN
+        const adminTab = document.getElementById('admin-tab');
+        if (App.currentUser && App.currentUser.role === 'admin') {
+            adminTab.style.display = 'block';
+            console.log("🔓 Onglet admin activé");
+        } else {
+            adminTab.style.display = 'none';
+            console.log("🔒 Onglet admin caché - utilisateur non admin");
+        }
+
         this.loadZones();
         this.loadIndicators();
+    },
+
+    // NOUVELLE FONCTION : Navigation par onglets
+    showTab: function(tabName) {
+        console.log("🔍 Changement d'onglet:", tabName);
+
+        // Cacher tous les contenus d'onglets
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.style.display = 'none';
+        });
+
+        // Désactiver tous les boutons d'onglets
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Afficher l'onglet sélectionné
+        const targetTab = document.getElementById(`tab-${tabName}`);
+        if (targetTab) {
+            targetTab.style.display = 'block';
+            event.target.classList.add('active');
+
+            // Charger les données si nécessaire
+            if (tabName === 'admin') {
+                console.log("🔄 Chargement des utilisateurs...");
+                admin.loadUsers();
+            } else if (tabName === 'stats') {
+                this.loadAirStats();
+            }
+        }
     },
 
     // Chargement des zones
@@ -182,7 +228,11 @@ loadIndicators: async function() {
             'temperature': '🌡️ Température',
             'humidity': '💧 Humidité',
             'waste_production': '🗑️ Déchets',
-            'energy_consumption': '⚡ Énergie'
+            'energy_consumption': '⚡ Énergie',
+            'wind_speed': '💨 Vitesse du vent',
+            'pressure': '⏱️ Pression atmosphérique'
+
+
         };
         return labels[type] || type;
     },

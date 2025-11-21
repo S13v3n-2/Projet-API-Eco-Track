@@ -5,6 +5,7 @@ const admin = {
 
     // Charger tous les utilisateurs
     loadUsers: async function() {
+        console.log("🔄 Chargement des utilisateurs...");
         document.getElementById('users-loading').style.display = 'block';
         document.getElementById('users-list').innerHTML = '';
 
@@ -13,6 +14,7 @@ const admin = {
 
             if (response.ok) {
                 this.currentUsers = await response.json();
+                console.log(`✅ ${this.currentUsers.length} utilisateurs chargés`);
                 this.displayUsers(this.currentUsers);
             } else if (response.status === 403) {
                 App.showMessage('Accès refusé - Droits administrateur requis', 'error');
@@ -21,7 +23,7 @@ const admin = {
             }
         } catch (error) {
             console.error('Error loading users:', error);
-            App.showMessage('Erreur lors du chargement des utilisateurs', 'error');
+            App.showMessage('Erreur lors du chargement des utilisateurs: ' + error.message, 'error');
         } finally {
             document.getElementById('users-loading').style.display = 'none';
         }

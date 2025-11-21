@@ -1,6 +1,6 @@
 // Gestion de l'authentification
 const auth = {
-    // Connexion
+    // Connexion - MODIFIÉE
     login: async function() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -22,6 +22,10 @@ const auth = {
             if (response.ok) {
                 App.token = data.access_token;
                 localStorage.setItem('ecotrack_token', App.token);
+
+                // NOUVEAU : Récupérer les infos de l'utilisateur connecté
+                await this.getCurrentUser();
+
                 dashboard.showDashboard();
                 App.showMessage('Connexion réussie!', 'success');
             } else {
@@ -29,6 +33,38 @@ const auth = {
             }
         } catch (error) {
             App.showMessage('Erreur de connexion: ' + error.message, 'error');
+        }
+    },
+
+    // NOUVELLE FONCTION : Récupérer l'utilisateur courant
+    getCurrentUser: async function() {
+        try {
+            const response = await App.apiRequest(`${App.API_BASE}/admin/users/me`);
+            if (response.ok) {
+                App.currentUser = await response.json();
+                console.log("👤 Utilisateur connecté:", App.currentUser);
+            }
+        } catch (error) {
+            console.error("Erreur récupération utilisateur:", error);
+            // Fallback: essayer une autre route
+            await this.getCurrentUserFallback();
+        }
+    },
+
+    // Fallback si la route /me n'existe pas
+    getCurrentUserFallback: async function() {
+        try {
+            // Récupérer tous les utilisateurs et trouver celui correspondant au token
+            const response = await App.apiRequest(`${App.API_BASE}/admin/users/`);
+            if (response.ok) {
+                const users = await response.json();
+                // Ici on suppose que le premier utilisateur est l'admin
+                // Dans un vrai système, vous auriez une route /me
+                App.currentUser = users[0];
+                console.log("👤 Utilisateur (fallback):", App.currentUser);
+            }
+        } catch (error) {
+            console.error("Erreur fallback utilisateur:", error);
         }
     },
 
