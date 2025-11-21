@@ -69,6 +69,16 @@
 
             <!-- Section Indicateurs -->
             <div id="tab-indicators" class="tab-content">
+                <!-- Contrôles d'ingestion -->
+                <div class="ingestion-controls" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <h3 style="margin-bottom: 15px;">🔄 Mise à jour des données</h3>
+                    <button id="fetch-external-data" class="btn btn-primary" style="padding: 10px 20px;">
+                        <span class="btn-text">🔄 Récupérer les données externes</span>
+                        <span class="btn-loading" style="display: none;">⏳ Récupération en cours...</span>
+                    </button>
+                    <div id="ingestion-result" style="margin-top: 10px; font-size: 14px;"></div>
+                </div>
+
                 <!-- Filtres -->
                 <div class="filter-section">
                     <h3>🔍 Filtres des données</h3>
@@ -163,7 +173,7 @@
                 </div>
             </div>
 
-            <!-- NOUVELLE SECTION ADMIN -->
+            <!-- Section ADMIN -->
             <div id="tab-admin" class="tab-content" style="display: none;">
                 <h3>👨‍💼 Gestion des utilisateurs</h3>
 
@@ -220,6 +230,7 @@
     <script src="js/auth.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/dashboard.js"></script>
-    <script src="js/admin.js"></script> <!-- NOUVEAU FICHIER ADMIN -->
+    <script src="js/admin.js"></script>
+    <script src="js/data-ingestion2.js"></script> <!-- NOUVEAU FICHIER -->
 </body>
 </html>

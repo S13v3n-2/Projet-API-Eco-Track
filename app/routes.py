@@ -5,6 +5,11 @@ from typing import List, Optional
 from datetime import datetime
 import csv
 import io
+import sys
+import os
+
+# Ajouter le chemin pour pouvoir importer data_ingestion
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import models, schemas, crud
 from app.auth import get_current_active_user, get_current_admin_user, get_db, authenticate_user, create_access_token
@@ -18,6 +23,7 @@ stats_router = APIRouter(prefix="/stats", tags=["Statistics"])
 admin_router = APIRouter(prefix="/admin", tags=["Admin"])
 upload_router = APIRouter(prefix="/upload", tags=["Upload"])
 
+
 # Routes d'authentification
 @auth_router.post("/register", response_model=schemas.User)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -26,6 +32,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email déjà enregistré")
     return crud.create_user(db=db, user=user)
 
+
 @auth_router.post("/login")
 def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     db_user = authenticate_user(db, user.email, user.password)
@@ -33,16 +40,17 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email ou mot de passe incorrect")
     return create_access_token(data={"sub": db_user.email})
 
+
 # Routes pour les indicateurs
 @indicators_router.get("/", response_model=List[schemas.Indicator])
 def read_indicators(
-    type: Optional[str] = None,
-    zone_id: Optional[int] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    limit: int = 25,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_active_user)
+        type: Optional[str] = None,
+        zone_id: Optional[int] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        limit: int = 25,
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_active_user)
 ):
     """Récupère les indicateurs avec filtres optionnels"""
     print(f"🔍 Filtres reçus - type: {type}, zone: {zone_id}, start: {start_date}, end: {end_date}, limit: {limit}")
@@ -73,42 +81,82 @@ def read_indicators(
     print(f"✅ {len(indicators)} indicateurs trouvés")
     return indicators
 
+
 @indicators_router.post("/", response_model=schemas.Indicator)
 def create_indicator(
-    indicator: schemas.IndicatorCreate,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_active_user)
+        indicator: schemas.IndicatorCreate,
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_active_user)
 ):
     return crud.create_indicator(db=db, indicator=indicator, user_id=current_user.id)
+
+
+# NOUVELLE ROUTE : Ingestion des données externes
+@indicators_router.post("/ingest/external-data")
+def ingest_external_data(
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_active_user)
+):
+    """Lance l'ingestion de données depuis les APIs externes"""
+    try:
+        print("🚀 Lancement de l'ingestion de données externes...")
+
+        # Importer et exécuter les fonctions d'ingestion
+        from data_ingestion import ingest_weather_data, ingest_air_quality_data, ingest_energy_data
+
+        # Exécuter l'ingestion
+        weather_count = ingest_weather_data()
+        air_quality_count = ingest_air_quality_data()
+        energy_count = ingest_energy_data()
+
+        total = weather_count + air_quality_count + energy_count
+
+        return {
+            "success": True,
+            "message": f"Ingestion terminée - {total} nouvelles données ajoutées",
+            "details": {
+                "weather_data": weather_count,
+                "air_quality_data": air_quality_count,
+                "energy_data": energy_count,
+                "total": total
+            }
+        }
+
+    except Exception as e:
+        print(f"❌ Erreur lors de l'ingestion: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'ingestion: {str(e)}")
+
 
 # Routes pour les zones
 @zones_router.get("/", response_model=List[schemas.Zone])
 def read_zones(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_active_user)
+        skip: int = 0,
+        limit: int = 100,
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_active_user)
 ):
     return crud.get_zones(db, skip=skip, limit=limit)
+
 
 # Routes pour les sources
 @sources_router.get("/", response_model=List[schemas.Source])
 def read_sources(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_active_user)
+        skip: int = 0,
+        limit: int = 100,
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_active_user)
 ):
     return crud.get_sources(db, skip=skip, limit=limit)
+
 
 # Routes de statistiques
 @stats_router.get("/air/averages")
 def get_air_averages(
-    start_date: str,
-    end_date: str,
-    zone_id: Optional[int] = None,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_active_user)
+        start_date: str,
+        end_date: str,
+        zone_id: Optional[int] = None,
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_active_user)
 ):
     try:
         start_dt = datetime.fromisoformat(start_date)
@@ -117,31 +165,34 @@ def get_air_averages(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Format de date invalide: {e}")
 
+
 @stats_router.get("/air/quality")
 def get_air_quality_stats(
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_active_user)
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_active_user)
 ):
     return crud.get_air_quality_stats(db)
+
 
 # Routes ADMIN
 @admin_router.get("/users/", response_model=List[schemas.User])
 def get_all_users(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_admin_user)
+        skip: int = 0,
+        limit: int = 100,
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_admin_user)
 ):
     """Récupère tous les utilisateurs (admin seulement)"""
     users = crud.get_users(db, skip=skip, limit=limit)
     print(f"👥 {len(users)} utilisateurs récupérés")
     return users
 
+
 @admin_router.get("/users/{user_id}", response_model=schemas.User)
 def get_user(
-    user_id: int,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_admin_user)
+        user_id: int,
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_admin_user)
 ):
     """Récupère un utilisateur par ID (admin seulement)"""
     db_user = crud.get_user(db, user_id=user_id)
@@ -149,12 +200,13 @@ def get_user(
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     return db_user
 
+
 @admin_router.put("/users/{user_id}", response_model=schemas.User)
 def update_user(
-    user_id: int,
-    user_update: schemas.UserUpdate,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_admin_user)
+        user_id: int,
+        user_update: schemas.UserUpdate,
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_admin_user)
 ):
     """Met à jour un utilisateur (admin seulement)"""
     if user_id == current_user.id:
@@ -165,11 +217,12 @@ def update_user(
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     return db_user
 
+
 @admin_router.delete("/users/{user_id}")
 def delete_user(
-    user_id: int,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_admin_user)
+        user_id: int,
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_admin_user)
 ):
     """Supprime un utilisateur (admin seulement)"""
     if user_id == current_user.id:
@@ -180,20 +233,22 @@ def delete_user(
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     return {"message": "Utilisateur supprimé avec succès"}
 
+
 @admin_router.get("/users/me", response_model=schemas.User)
 def get_current_user_info(
-    current_user: models.User = Depends(get_current_active_user)
+        current_user: models.User = Depends(get_current_active_user)
 ):
     """Récupère les informations de l'utilisateur connecté"""
     print(f"👤 Utilisateur courant demandé: {current_user.email} (role: {current_user.role})")
     return current_user
 
+
 # Upload CSV
 @upload_router.post("/csv/")
 async def upload_csv(
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_admin_user)
+        file: UploadFile = File(...),
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(get_current_admin_user)
 ):
     if not file.filename.endswith('.csv'):
         raise HTTPException(status_code=400, detail="Seuls les fichiers CSV sont acceptés")

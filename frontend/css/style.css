@@ -602,3 +602,38 @@ select:focus {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--secondary-dark);
 }
+.ingestion-controls {
+    border: 1px solid #dee2e6;
+    background: linear-gradient(135deg, #e8f4fd, #f0f8ff);
+}
+
+#fetch-external-data {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#fetch-external-data:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+#fetch-external-data:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+#ingestion-result {
+    font-size: 14px;
+    min-height: 20px;
+}
+
+#ingestion-result small {
+    opacity: 0.8;
+}
