@@ -78,6 +78,7 @@ EcoTrack est une API REST complète développée avec **FastAPI** permettant de 
 - **Monitoring** des données
 
 ## Architecture
+```python
 EcoTrack/
 ├── app/ # Application principale
 │ ├── main.py # Point d'entrée FastAPI
@@ -101,7 +102,7 @@ EcoTrack/
 │ ├── admin.js
 │ └── data-ingestion.js
 └── requirements.txt
-
+```
 
 ## Installation
 
