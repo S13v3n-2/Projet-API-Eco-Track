@@ -26,25 +26,27 @@ const filters = {
                 break;
             case 'month':
                 const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-                startDateInput.value = startOfMonth.toISOString().split('T')[0];
-                endDateInput.value = today.toISOString().split('T')[0];
+                const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                startDateInput.value = this.formatDate(startOfMonth);
+                endDateInput.value = this.formatDate(endOfMonth);
                 break;
             case 'year':
                 const startOfYear = new Date(today.getFullYear(), 0, 1);
-                startDateInput.value = startOfYear.toISOString().split('T')[0];
-                endDateInput.value = today.toISOString().split('T')[0];
+                const endOfYear = new Date(today.getFullYear(), 11, 31);
+                startDateInput.value = this.formatDate(startOfYear);
+                endDateInput.value = this.formatDate(endOfYear);
                 break;
             case 'last7days':
                 const sevenDaysAgo = new Date(today);
                 sevenDaysAgo.setDate(today.getDate() - 7);
-                startDateInput.value = sevenDaysAgo.toISOString().split('T')[0];
-                endDateInput.value = today.toISOString().split('T')[0];
+                startDateInput.value = this.formatDate(sevenDaysAgo);
+                endDateInput.value = this.formatDate(today);
                 break;
             case 'last30days':
                 const thirtyDaysAgo = new Date(today);
                 thirtyDaysAgo.setDate(today.getDate() - 30);
-                startDateInput.value = thirtyDaysAgo.toISOString().split('T')[0];
-                endDateInput.value = today.toISOString().split('T')[0];
+                startDateInput.value = this.formatDate(thirtyDaysAgo);
+                endDateInput.value = this.formatDate(today);
                 break;
         }
 
@@ -55,7 +57,6 @@ const filters = {
 
     // Mise à jour des filtres de date
     updateDateFilters: function() {
-        // Réinitialiser la sélection de période rapide si les dates sont modifiées manuellement
         document.getElementById('filter-period').value = '';
         dashboard.loadIndicators();
     },
@@ -66,8 +67,36 @@ const filters = {
         document.getElementById('filter-zone').value = '';
         document.getElementById('filter-limit').value = '25';
         document.getElementById('filter-period').value = '';
-        App.initializeDates();
+        this.initializeDefaultDates();
         dashboard.loadIndicators();
         App.showMessage('Filtres réinitialisés', 'success');
+    },
+
+    // Initialisation des dates par défaut (début du mois → fin du mois)
+    initializeDefaultDates: function() {
+        const today = new Date();
+        const startDateInput = document.getElementById('filter-start-date');
+        const endDateInput = document.getElementById('filter-end-date');
+
+        // Date de début : 1er du mois
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        // Date de fin : dernier jour du mois
+        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+        startDateInput.value = this.formatDate(startOfMonth);
+        endDateInput.value = this.formatDate(endOfMonth);
+
+        console.log('📅 Dates initialisées:', startDateInput.value, '→', endDateInput.value);
+    },
+
+    // Formatage de date en YYYY-MM-DD
+    formatDate: function(date) {
+        return date.toISOString().split('T')[0];
     }
 };
+
+// Initialisation au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    filters.initializeDefaultDates();
+});
