@@ -1,7 +1,6 @@
 import sys
 import os
 
-# Ajouter le chemin du projet
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy.orm import Session
@@ -9,21 +8,24 @@ from app.database import SessionLocal, engine, Base
 from app.models import User, Zone, Source, Indicator
 from app.auth import get_password_hash
 from datetime import datetime
+import json
 
 
 def init_database():
     """
     Script d'initialisation de la base de données EcoTrack
-    Crée les tables et insère des données d'exemple
+    Crée les tables et insère des données de base
     """
-    # Créer les tables
+    print("🔄 Création des tables...")
+
+    # Créer TOUTES les tables
     Base.metadata.create_all(bind=engine)
+    print("✅ Tables créées avec succès")
 
     db = SessionLocal()
 
     try:
-        print("🔄 Initialisation de la base de données EcoTrack...")
-        print("📁 Base de données: data/ecotrack.db")
+        print("🔄 Initialisation des données de base...")
 
         # === CRÉATION DE L'UTILISATEUR ADMIN ===
         admin_email = "admin@ecotrack.com"
@@ -47,16 +49,11 @@ def init_database():
 
         # === CRÉATION DES ZONES GÉOGRAPHIQUES ===
         zones_data = [
-            {"name": "Paris Centre", "postal_code": "75001"},
-            {"name": "Paris Nord", "postal_code": "75018"},
-            {"name": "Paris Sud", "postal_code": "75014"},
-            {"name": "Lyon Centre", "postal_code": "69001"},
-            {"name": "Lyon Part-Dieu", "postal_code": "69003"},
-            {"name": "Marseille Centre", "postal_code": "13001"},
-            {"name": "Marseille Vieux-Port", "postal_code": "13007"},
-            {"name": "Bordeaux Centre", "postal_code": "33000"},
-            {"name": "Lille Centre", "postal_code": "59000"},
-            {"name": "Toulouse Centre", "postal_code": "31000"},
+            {"name": "Paris Centre", "postal_code": "75001", "lat": 48.8566, "lon": 2.3522},
+            {"name": "Lyon Centre", "postal_code": "69001", "lat": 45.7640, "lon": 4.8357},
+            {"name": "Marseille Centre", "postal_code": "13001", "lat": 43.2965, "lon": 5.3698},
+            {"name": "Bordeaux Centre", "postal_code": "33000", "lat": 44.8378, "lon": -0.5792},
+            {"name": "Lille Centre", "postal_code": "59000", "lat": 50.6292, "lon": 3.0573},
         ]
 
         zones_created = 0
@@ -66,7 +63,17 @@ def init_database():
             ).first()
 
             if not existing_zone:
-                zone = Zone(**zone_data)
+                # Créer la géométrie au format GeoJSON
+                geometry = {
+                    "type": "Point",
+                    "coordinates": [zone_data["lon"], zone_data["lat"]]
+                }
+
+                zone = Zone(
+                    name=zone_data["name"],
+                    postal_code=zone_data["postal_code"],
+                    geometry=json.dumps(geometry)  # Stocker en tant que JSON string
+                )
                 db.add(zone)
                 zones_created += 1
 
@@ -79,29 +86,19 @@ def init_database():
         # === CRÉATION DES SOURCES DE DONNÉES ===
         sources_data = [
             {
-                "name": "OpenAQ",
-                "description": "Plateforme ouverte de données sur la qualité de l'air en temps réel",
-                "url": "https://openaq.org"
-            },
-            {
-                "name": "ADEME",
-                "description": "Agence de la transition écologique - Données environnementales françaises",
-                "url": "https://data.ademe.fr"
-            },
-            {
-                "name": "data.gouv.fr",
-                "description": "Plateforme ouverte des données publiques françaises",
-                "url": "https://data.gouv.fr"
-            },
-            {
                 "name": "OpenMeteo",
                 "description": "API météorologique gratuite avec données historiques",
                 "url": "https://open-meteo.com"
             },
             {
-                "name": "Capteurs Locaux",
-                "description": "Réseau de capteurs environnementaux locaux",
-                "url": ""
+                "name": "WAQI",
+                "description": "World Air Quality Index - Données qualité air mondiales",
+                "url": "https://waqi.info"
+            },
+            {
+                "name": "ADEME",
+                "description": "Agence de la transition écologique - Données environnementales françaises",
+                "url": "https://data.ademe.fr"
             }
         ]
 
@@ -121,114 +118,6 @@ def init_database():
             print(f"✅ {sources_created} sources de données créées")
         else:
             print("✅ Sources de données existent déjà")
-
-        # === CRÉATION D'INDICATEURS ENVIRONNEMENTAUX D'EXEMPLE ===
-        zones = db.query(Zone).all()
-        sources = db.query(Source).all()
-
-        if not zones or not sources:
-            print("❌ Impossible de créer les indicateurs: zones ou sources manquantes")
-            return
-
-        # Types d'indicateurs environnementaux
-        indicator_types = [
-            {
-                "type": "air_quality_pm25",
-                "unit": "µg/m³",
-                "description": "Particules fines PM2.5"
-            },
-            {
-                "type": "air_quality_pm10",
-                "unit": "µg/m³",
-                "description": "Particules fines PM10"
-            },
-            {
-                "type": "air_quality_no2",
-                "unit": "µg/m³",
-                "description": "Dioxyde d'azote"
-            },
-            {
-                "type": "co2",
-                "unit": "ppm",
-                "description": "Dioxyde de carbone"
-            },
-            {
-                "type": "temperature",
-                "unit": "°C",
-                "description": "Température ambiante"
-            },
-            {
-                "type": "humidity",
-                "unit": "%",
-                "description": "Humidité relative"
-            },
-            {
-                "type": "waste_production",
-                "unit": "kg/jour",
-                "description": "Production de déchets"
-            },
-            {
-                "type": "energy_consumption",
-                "unit": "kWh",
-                "description": "Consommation énergétique"
-            }
-        ]
-
-        # Créer des indicateurs réalistes pour chaque zone
-        indicators_created = 0
-        from datetime import timedelta
-
-        for zone in zones:
-            for i, ind_type in enumerate(indicator_types):
-                # Valeurs réalistes selon le type d'indicateur
-                base_values = {
-                    "air_quality_pm25": (8, 25),  # µg/m³ (bon à moyen)
-                    "air_quality_pm10": (12, 40),  # µg/m³
-                    "air_quality_no2": (15, 60),  # µg/m³
-                    "co2": (400, 450),  # ppm
-                    "temperature": (5, 25),  # °C
-                    "humidity": (40, 85),  # %
-                    "waste_production": (200, 800),  # kg/jour
-                    "energy_consumption": (1000, 5000)  # kWh
-                }
-
-                min_val, max_val = base_values.get(ind_type["type"], (0, 100))
-
-                # Créer 3 mesures par indicateur avec des dates différentes
-                for days_ago in [0, 1, 2]:
-                    # Variation réaliste selon la zone et le temps
-                    zone_factor = hash(zone.name) % 100 / 100  # Facteur unique par zone
-                    time_factor = (days_ago * 0.1)  # Légère variation dans le temps
-
-                    value = min_val + (max_val - min_val) * (0.5 + zone_factor * 0.5 - time_factor)
-                    value = round(value, 2)
-
-                    # Vérifier si l'indicateur existe déjà
-                    existing_indicator = db.query(Indicator).filter(
-                        Indicator.type == ind_type["type"],
-                        Indicator.zone_id == zone.id,
-                        Indicator.timestamp == datetime.utcnow() - timedelta(days=days_ago)
-                    ).first()
-
-                    if not existing_indicator:
-                        indicator = Indicator(
-                            type=ind_type["type"],
-                            value=value,
-                            unit=ind_type["unit"],
-                            timestamp=datetime.utcnow() - timedelta(days=days_ago),
-                            zone_id=zone.id,
-                            source_id=sources[i % len(sources)].id,  # Répartir les sources
-                            user_id=admin.id,
-                            additional_data=f'{{"description": "{ind_type["description"]}", "quality": "good"}}'
-                        )
-                        db.add(indicator)
-                        indicators_created += 1
-
-        if indicators_created > 0:
-            db.commit()
-            print(f"✅ {indicators_created} indicateurs environnementaux créés")
-        else:
-            print("✅ Indicateurs environnementaux existent déjà")
 
         # === RÉSUMÉ FINAL ===
         print("\n" + "=" * 50)
@@ -250,6 +139,8 @@ def init_database():
         print("   Mot de passe: admin123")
         print("\n🌐 Pour démarrer l'API:")
         print("   uvicorn app.main:app --reload")
+        print("\n📥 Pour ingérer des données réelles:")
+        print("   python scripts/data_ingestion.py")
         print("=" * 50)
 
     except Exception as e:
