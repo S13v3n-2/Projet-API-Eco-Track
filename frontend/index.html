@@ -5,35 +5,234 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EcoTrack - Dashboard</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: #2ecc71; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        .card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .btn { background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-        .error { color: #e74c3c; background: #fadbd8; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
-        .success { color: #27ae60; background: #d5f4e6; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #2ecc71;
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn-success {
+            background: #27ae60;
+        }
+        .btn-success:hover {
+            background: #219652;
+        }
+        .btn-danger {
+            background: #e74c3c;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        .btn-warning {
+            background: #f39c12;
+        }
+        .btn-warning:hover {
+            background: #d35400;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .error {
+            color: #e74c3c;
+            background: #fadbd8;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid #e74c3c;
+        }
+        .success {
+            color: #27ae60;
+            background: #d5f4e6;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid #27ae60;
+        }
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .indicator-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .indicator-type {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .indicator-value {
+            font-size: 1.2em;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .indicator-meta {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-label {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+        .filter-section {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+        }
+        .filter-group {
+            flex: 1;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+        .quality-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .quality-good { background: #d5f4e6; color: #27ae60; }
+        .quality-moderate { background: #fff3cd; color: #856404; }
+        .quality-poor { background: #f8d7da; color: #721c24; }
+        .user-info {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .date-inputs {
+            display: flex;
+            gap: 10px;
+        }
+        .date-inputs .filter-group {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌍 EcoTrack</h1>
-            <p>Suivi des indicateurs environnementaux</p>
+            <div class="header-content">
+                <div>
+                    <h1>🌍 EcoTrack</h1>
+                    <p>Tableau de bord de suivi des indicateurs environnementaux</p>
+                </div>
+                <div id="user-header" style="display: none;">
+                    <button class="btn btn-danger" onclick="logout()">🚪 Déconnexion</button>
+                </div>
+            </div>
+            <div id="user-info" class="user-info" style="display: none;"></div>
         </div>
 
-        <div class="card">
-            <h2>Connexion</h2>
+        <!-- Formulaire de connexion -->
+        <div class="card" id="login-section">
+            <h2>🔐 Connexion</h2>
             <div id="login-form">
                 <div class="form-group">
                     <label>Email:</label>
-                    <input type="email" id="email" placeholder="votre@email.com">
+                    <input type="email" id="email" placeholder="admin@ecotrack.com">
                 </div>
                 <div class="form-group">
                     <label>Mot de passe:</label>
-                    <input type="password" id="password">
+                    <input type="password" id="password" placeholder="admin123">
                 </div>
                 <button class="btn" onclick="login()">Se connecter</button>
                 <button class="btn" onclick="showRegister()">Créer un compte</button>
@@ -52,21 +251,107 @@
                     <label>Mot de passe:</label>
                     <input type="password" id="reg_password">
                 </div>
-                <button class="btn" onclick="register()">Créer le compte</button>
+                <button class="btn btn-success" onclick="register()">Créer le compte</button>
                 <button class="btn" onclick="showLogin()">Retour à la connexion</button>
             </div>
         </div>
 
+        <!-- Tableau de bord -->
         <div class="card" id="dashboard" style="display: none;">
-            <h2>Tableau de bord</h2>
-            <div id="user-info"></div>
+            <h2>📊 Tableau de bord</h2>
 
-            <h3>Indicateurs récents</h3>
-            <div id="indicators-list"></div>
+            <!-- Filtres -->
+            <div class="filter-section">
+                <h3>🔍 Filtres des données</h3>
 
-            <h3>Statistiques qualité de l'air</h3>
-            <button class="btn" onclick="loadAirStats()">Charger les statistiques</button>
-            <div id="air-stats"></div>
+                <!-- Filtres par date -->
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Date de début:</label>
+                        <input type="date" id="filter-start-date" onchange="updateDateFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label>Date de fin:</label>
+                        <input type="date" id="filter-end-date" onchange="updateDateFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label>Période rapide:</label>
+                        <select id="filter-period" onchange="applyQuickPeriod()">
+                            <option value="">Personnalisée</option>
+                            <option value="today">Aujourd'hui</option>
+                            <option value="yesterday">Hier</option>
+                            <option value="week">Cette semaine</option>
+                            <option value="month">Ce mois</option>
+                            <option value="year">Cette année</option>
+                            <option value="last7days">7 derniers jours</option>
+                            <option value="last30days">30 derniers jours</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filtres par type et zone -->
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Type d'indicateur:</label>
+                        <select id="filter-type" onchange="loadIndicators()">
+                            <option value="">Tous les types</option>
+                            <option value="air_quality_pm25">PM2.5</option>
+                            <option value="air_quality_pm10">PM10</option>
+                            <option value="air_quality_no2">NO2</option>
+                            <option value="co2">CO2</option>
+                            <option value="temperature">Température</option>
+                            <option value="humidity">Humidité</option>
+                            <option value="waste_production">Déchets</option>
+                            <option value="energy_consumption">Énergie</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Zone:</label>
+                        <select id="filter-zone" onchange="loadIndicators()">
+                            <option value="">Toutes les zones</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Limite:</label>
+                        <select id="filter-limit" onchange="loadIndicators()">
+                            <option value="10">10 résultats</option>
+                            <option value="25" selected>25 résultats</option>
+                            <option value="50">50 résultats</option>
+                            <option value="100">100 résultats</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-warning" onclick="resetFilters()">🔄 Réinitialiser les filtres</button>
+            </div>
+
+            <!-- Indicateurs récents -->
+            <h3>📈 Indicateurs récents</h3>
+            <div id="indicators-container">
+                <div class="loading" id="indicators-loading">Chargement des indicateurs...</div>
+                <div class="indicators-grid" id="indicators-list"></div>
+            </div>
+
+            <!-- Statistiques qualité de l'air -->
+            <h3>📊 Statistiques qualité de l'air</h3>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Date début stats:</label>
+                    <input type="date" id="stats-start-date" value="2024-01-01">
+                </div>
+                <div class="filter-group">
+                    <label>Date fin stats:</label>
+                    <input type="date" id="stats-end-date" value="2024-12-31">
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-success" onclick="loadAirStats()">📊 Charger les statistiques</button>
+                </div>
+            </div>
+            <div id="stats-container">
+                <div class="loading" id="stats-loading" style="display: none;">Calcul des statistiques...</div>
+                <div class="stats-container" id="air-stats"></div>
+            </div>
         </div>
 
         <div id="message"></div>
@@ -75,15 +360,47 @@
     <script>
         const API_BASE = "http://localhost:8000";
         let token = localStorage.getItem('ecotrack_token');
+        let currentUser = null;
 
-        if (token) {
-            showDashboard();
+        // Au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDates();
+            if (token) {
+                showDashboard();
+            }
+        });
+
+        function initializeDates() {
+            const today = new Date().toISOString().split('T')[0];
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            const oneWeekAgoStr = oneWeekAgo.toISOString().split('T')[0];
+
+            // Définir les dates par défaut
+            document.getElementById('filter-start-date').value = oneWeekAgoStr;
+            document.getElementById('filter-end-date').value = today;
+
+            // Dates pour les stats (année en cours)
+            const currentYear = new Date().getFullYear();
+            document.getElementById('stats-start-date').value = `${currentYear}-01-01`;
+            document.getElementById('stats-end-date').value = `${currentYear}-12-31`;
         }
 
         function showMessage(text, type) {
             const messageDiv = document.getElementById('message');
             messageDiv.innerHTML = `<div class="${type}">${text}</div>`;
             setTimeout(() => messageDiv.innerHTML = '', 5000);
+        }
+
+        function logout() {
+            localStorage.removeItem('ecotrack_token');
+            token = null;
+            currentUser = null;
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('user-header').style.display = 'none';
+            document.getElementById('user-info').style.display = 'none';
+            showMessage('Déconnexion réussie', 'success');
         }
 
         async function login() {
@@ -108,7 +425,7 @@
                     showMessage(data.detail, 'error');
                 }
             } catch (error) {
-                showMessage('Erreur de connexion', 'error');
+                showMessage('Erreur de connexion: ' + error.message, 'error');
             }
         }
 
@@ -127,59 +444,257 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    showMessage('Compte créé avec succès!', 'success');
+                    showMessage('Compte créé avec succès! Vous pouvez maintenant vous connecter.', 'success');
                     showLogin();
                 } else {
                     showMessage(data.detail, 'error');
                 }
             } catch (error) {
-                showMessage('Erreur lors de la création du compte', 'error');
+                showMessage('Erreur lors de la création du compte: ' + error.message, 'error');
             }
         }
 
         async function showDashboard() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-section').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('user-header').style.display = 'block';
+            document.getElementById('user-info').style.display = 'block';
 
-            // Charger les indicateurs
+            // Afficher les infos utilisateur
+            document.getElementById('user-info').innerHTML = `
+                <strong>👤 Connecté en tant que:</strong> ${document.getElementById('email').value || 'admin@ecotrack.com'}
+            `;
+
+            // Charger les données
+            await loadZones();
             await loadIndicators();
         }
 
-        async function loadIndicators() {
+        function applyQuickPeriod() {
+            const period = document.getElementById('filter-period').value;
+            const startDateInput = document.getElementById('filter-start-date');
+            const endDateInput = document.getElementById('filter-end-date');
+            const today = new Date();
+
+            switch(period) {
+                case 'today':
+                    startDateInput.value = today.toISOString().split('T')[0];
+                    endDateInput.value = today.toISOString().split('T')[0];
+                    break;
+                case 'yesterday':
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    startDateInput.value = yesterday.toISOString().split('T')[0];
+                    endDateInput.value = yesterday.toISOString().split('T')[0];
+                    break;
+                case 'week':
+                    const startOfWeek = new Date(today);
+                    startOfWeek.setDate(today.getDate() - today.getDay());
+                    startDateInput.value = startOfWeek.toISOString().split('T')[0];
+                    endDateInput.value = today.toISOString().split('T')[0];
+                    break;
+                case 'month':
+                    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                    startDateInput.value = startOfMonth.toISOString().split('T')[0];
+                    endDateInput.value = today.toISOString().split('T')[0];
+                    break;
+                case 'year':
+                    const startOfYear = new Date(today.getFullYear(), 0, 1);
+                    startDateInput.value = startOfYear.toISOString().split('T')[0];
+                    endDateInput.value = today.toISOString().split('T')[0];
+                    break;
+                case 'last7days':
+                    const sevenDaysAgo = new Date(today);
+                    sevenDaysAgo.setDate(today.getDate() - 7);
+                    startDateInput.value = sevenDaysAgo.toISOString().split('T')[0];
+                    endDateInput.value = today.toISOString().split('T')[0];
+                    break;
+                case 'last30days':
+                    const thirtyDaysAgo = new Date(today);
+                    thirtyDaysAgo.setDate(today.getDate() - 30);
+                    startDateInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+                    endDateInput.value = today.toISOString().split('T')[0];
+                    break;
+            }
+
+            if (period) {
+                loadIndicators();
+            }
+        }
+
+        function updateDateFilters() {
+            // Réinitialiser la sélection de période rapide si les dates sont modifiées manuellement
+            document.getElementById('filter-period').value = '';
+            loadIndicators();
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-type').value = '';
+            document.getElementById('filter-zone').value = '';
+            document.getElementById('filter-limit').value = '25';
+            document.getElementById('filter-period').value = '';
+            initializeDates();
+            loadIndicators();
+        }
+
+        async function loadZones() {
             try {
-                const response = await fetch(`${API_BASE}/indicators/`, {
+                const response = await fetch(`${API_BASE}/zones/`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (response.ok) {
-                    const indicators = await response.json();
-                    const list = document.getElementById('indicators-list');
-                    list.innerHTML = indicators.map(ind =>
-                        `<div>${ind.type}: ${ind.value} ${ind.unit} (${new Date(ind.timestamp).toLocaleDateString()})</div>`
-                    ).join('');
+                    const zones = await response.json();
+                    const zoneSelect = document.getElementById('filter-zone');
+
+                    zones.forEach(zone => {
+                        const option = document.createElement('option');
+                        option.value = zone.id;
+                        option.textContent = `${zone.name} (${zone.postal_code})`;
+                        zoneSelect.appendChild(option);
+                    });
                 }
             } catch (error) {
-                console.error('Error loading indicators:', error);
+                console.error('Error loading zones:', error);
             }
         }
 
-        async function loadAirStats() {
+        async function loadIndicators() {
+            const typeFilter = document.getElementById('filter-type').value;
+            const zoneFilter = document.getElementById('filter-zone').value;
+            const limit = document.getElementById('filter-limit').value;
+            const startDate = document.getElementById('filter-start-date').value;
+            const endDate = document.getElementById('filter-end-date').value;
+
+            document.getElementById('indicators-loading').style.display = 'block';
+            document.getElementById('indicators-list').innerHTML = '';
+
             try {
-                const response = await fetch(`${API_BASE}/stats/air/averages?start_date=2024-01-01&end_date=2024-12-31`, {
+                let url = `${API_BASE}/indicators/?limit=${limit}`;
+                if (typeFilter) url += `&type=${typeFilter}`;
+                if (zoneFilter) url += `&zone_id=${zoneFilter}`;
+
+                // Note: L'API devra être modifiée pour supporter les filtres par date
+                // Pour l'instant on filtre côté client
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    let indicators = await response.json();
+
+                    // Filtrage côté client par date (temporaire)
+                    if (startDate && endDate) {
+                        indicators = indicators.filter(ind => {
+                            const indDate = new Date(ind.timestamp).toISOString().split('T')[0];
+                            return indDate >= startDate && indDate <= endDate;
+                        });
+                    }
+
+                    displayIndicators(indicators);
+                }
+            } catch (error) {
+                console.error('Error loading indicators:', error);
+                showMessage('Erreur lors du chargement des indicateurs', 'error');
+            } finally {
+                document.getElementById('indicators-loading').style.display = 'none';
+            }
+        }
+
+        function displayIndicators(indicators) {
+            const list = document.getElementById('indicators-list');
+
+            if (indicators.length === 0) {
+                list.innerHTML = '<div class="loading">Aucun indicateur trouvé pour la période sélectionnée</div>';
+                return;
+            }
+
+            list.innerHTML = indicators.map(ind => {
+                const date = new Date(ind.timestamp).toLocaleDateString('fr-FR');
+                const quality = getQualityBadge(ind.type, ind.value);
+
+                return `
+                    <div class="indicator-card">
+                        <div class="indicator-type">${getIndicatorLabel(ind.type)}</div>
+                        <div class="indicator-value">${ind.value} ${ind.unit}</div>
+                        <div class="indicator-meta">
+                            📍 Zone: ${ind.zone_id} | 📅 ${date}
+                            ${quality}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getIndicatorLabel(type) {
+            const labels = {
+                'air_quality_pm25': '🟡 PM2.5',
+                'air_quality_pm10': '🟠 PM10',
+                'air_quality_no2': '🔴 NO2',
+                'co2': '💨 CO2',
+                'temperature': '🌡️ Température',
+                'humidity': '💧 Humidité',
+                'waste_production': '🗑️ Déchets',
+                'energy_consumption': '⚡ Énergie'
+            };
+            return labels[type] || type;
+        }
+
+        function getQualityBadge(type, value) {
+            if (type === 'air_quality_pm25') {
+                if (value <= 15) return '<span class="quality-badge quality-good">BON</span>';
+                if (value <= 25) return '<span class="quality-badge quality-moderate">MOYEN</span>';
+                return '<span class="quality-badge quality-poor">MAUVAIS</span>';
+            }
+            if (type === 'air_quality_pm10') {
+                if (value <= 20) return '<span class="quality-badge quality-good">BON</span>';
+                if (value <= 35) return '<span class="quality-badge quality-moderate">MOYEN</span>';
+                return '<span class="quality-badge quality-poor">MAUVAIS</span>';
+            }
+            return '';
+        }
+
+        async function loadAirStats() {
+            const startDate = document.getElementById('stats-start-date').value;
+            const endDate = document.getElementById('stats-end-date').value;
+
+            document.getElementById('stats-loading').style.display = 'block';
+            document.getElementById('air-stats').innerHTML = '';
+
+            try {
+                const response = await fetch(
+                    `${API_BASE}/stats/air/averages?start_date=${startDate}&end_date=${endDate}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (response.ok) {
                     const stats = await response.json();
-                    const statsDiv = document.getElementById('air-stats');
-                    statsDiv.innerHTML = stats.map(stat =>
-                        `<div>${stat.zone_name}: ${stat.average_quality.toFixed(2)} (${stat.data_points} points)</div>`
-                    ).join('');
+                    displayAirStats(stats);
                 }
             } catch (error) {
                 console.error('Error loading stats:', error);
+                showMessage('Erreur lors du chargement des statistiques', 'error');
+            } finally {
+                document.getElementById('stats-loading').style.display = 'none';
             }
+        }
+
+        function displayAirStats(stats) {
+            const statsDiv = document.getElementById('air-stats');
+
+            if (stats.length === 0) {
+                statsDiv.innerHTML = '<div class="loading">Aucune statistique disponible pour la période sélectionnée</div>';
+                return;
+            }
+
+            statsDiv.innerHTML = stats.map(stat => `
+                <div class="stat-card">
+                    <div class="stat-label">${stat.zone_name}</div>
+                    <div class="stat-value">${stat.average_quality.toFixed(1)} µg/m³</div>
+                    <div class="stat-label">${stat.data_points} mesures</div>
+                    <div class="stat-label">${stat.period || ''}</div>
+                </div>
+            `).join('');
         }
 
         function showRegister() {

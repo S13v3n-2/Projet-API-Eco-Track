@@ -98,3 +98,32 @@ def get_air_averages(db: Session, start_date: str, end_date: str, zone_id: Optio
         }
         for row in result
     ]
+
+
+def get_air_quality_stats(db: Session):
+    """Statistiques complètes sur la qualité de l'air"""
+    # Moyennes par type de polluant
+    pollutants = ['air_quality_pm25', 'air_quality_pm10', 'air_quality_no2']
+
+    stats = []
+    for pollutant in pollutants:
+        result = db.query(
+            func.avg(Indicator.value).label('average'),
+            func.count(Indicator.id).label('count'),
+            func.min(Indicator.value).label('min'),
+            func.max(Indicator.value).label('max')
+        ).filter(
+            Indicator.type == pollutant
+        ).first()
+
+        if result and result[0]:  # Vérifier si result[0] n'est pas None
+            stats.append({
+                'pollutant': pollutant,
+                'average': round(float(result[0]), 2),
+                'count': result[1],
+                'min': round(float(result[2]), 2) if result[2] else 0,
+                'max': round(float(result[3]), 2) if result[3] else 0,
+                'unit': 'µg/m³'
+            })
+
+    return stats
