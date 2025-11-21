@@ -80,7 +80,7 @@ Le projet repose sur les technologies suivantes :
 ### Cloner le dépôt
 
 ``` bash
-git clone [https://github.com/votre-username/ecotrack.git](https://github.com/S13v3n-2/Projet-API-Eco-Track.git)
+git clone https://github.com/S13v3n-2/Projet-API-Eco-Track.git
 cd Projet-API-Eco-Track
 ```
 
