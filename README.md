@@ -1,94 +1,92 @@
-EcoTrack - API de Suivi Environnemental
-EcoTrack est une interface de programmation (API REST) développée avec le framework FastAPI. Elle permet la collecte, le stockage et l'analyse d'indicateurs environnementaux locaux tels que la qualité de l'air, les conditions météorologiques et la consommation énergétique.
+# EcoTrack - API de Suivi Environnemental
 
-Ce projet a été réalisé dans un cadre pédagogique pour démontrer l'implémentation d'une architecture backend complète incluant l'authentification sécurisée, la gestion de bases de données relationnelles et l'ingestion de données externes.
+EcoTrack est une interface de programmation (API REST) développée avec
+le framework FastAPI. Elle permet la collecte, le stockage et l'analyse
+d'indicateurs environnementaux locaux tels que la qualité de l'air, les
+conditions météorologiques et la consommation énergétique.
 
-Table des matières
-Description du projet
+Ce projet a été réalisé dans un cadre pédagogique pour démontrer
+l'implémentation d'une architecture backend complète incluant
+l'authentification sécurisée, la gestion de bases de données
+relationnelles et l'ingestion de données externes.
 
-Architecture technique
+## Table des matières
 
-Fonctionnalités
+-   Description du projet
+-   Architecture technique
+-   Fonctionnalités
+-   Prérequis
+-   Installation
+-   Utilisation
+-   Documentation de lAPI
+-   Sources de données
+-   Structure du projet
+-   Auteurs et Licence
 
-Prérequis
+## Description du projet
 
-Installation
-
-Utilisation
-
-Documentation de l'API
-
-Sources de données
-
-Auteurs et Licence
-
-Description du projet
-L'application EcoTrack agrège des séries temporelles d'indicateurs environnementaux par zone géographique. Elle expose ces données via une API documentée et fournit un tableau de bord (dashboard) pour la visualisation.
+L'application EcoTrack agrège des séries temporelles d'indicateurs
+environnementaux par zone géographique. Elle expose ces données via une
+API documentée et fournit un tableau de bord (dashboard) pour la
+visualisation.
 
 Le système est conçu pour :
 
-Centraliser des données hétérogènes (API externes, fichiers CSV).
+-   Centraliser des données hétérogènes (API externes, fichiers CSV).
+-   Fournir des statistiques agrégées (moyennes, tendances).
+-   Gérer les droits d'accès via un système de rôles (RBAC).
 
-Fournir des statistiques agrégées (moyennes, tendances).
+## Architecture technique
 
-Gérer les droits d'accès via un système de rôles (RBAC).
-
-Architecture technique
 Le projet repose sur les technologies suivantes :
 
-Langage : Python 3.8+
+-   Langage : Python 3.8+
+-   Framework Web : FastAPI
+-   Serveur d'application : Uvicorn
+-   Base de données : SQLite
+-   ORM : SQLAlchemy
+-   Authentification : JWT (JSON Web Tokens) et Passlib (Bcrypt)
+-   Frontend : HTML5, CSS3, JavaScript (Vanilla)
 
-Framework Web : FastAPI
+## Fonctionnalités
 
-Serveur d'application : Uvicorn
+### Backend (API)
 
-Base de données : SQLite
+-   Authentification : Inscription et connexion sécurisée par token JWT.
+-   Gestion des utilisateurs : Distinction entre utilisateurs standards
+    (lecture seule) et administrateurs (gestion des utilisateurs, import
+    de données).
+-   Indicateurs : Création, lecture, filtrage (par date, zone, type) et
+    pagination des données.
+-   Statistiques : Calcul de moyennes et analyse de la qualité de l'air
+    sur des périodes données.
+-   Ingestion : Scripts automatisés pour la récupération de données
+    depuis des API tierces.
 
-ORM : SQLAlchemy
+### Frontend (Dashboard)
 
-Authentification : JWT (JSON Web Tokens) et Passlib (Bcrypt)
+-   Visualisation des indicateurs sous forme de cartes.
+-   Interface d'administration pour la gestion des comptes utilisateurs.
+-   Déclenchement manuel de la synchronisation des données externes.
 
-Frontend : HTML5, CSS3, JavaScript (Vanilla)
+## Prérequis
 
-Fonctionnalités
-Backend (API)
-Authentification : Inscription et connexion sécurisée par token JWT.
+-   Python 3.8 ou version supérieure.
+-   pip (gestionnaire de paquets Python).
+-   Un navigateur web moderne pour l'accès au dashboard.
 
-Gestion des utilisateurs : Distinction entre utilisateurs standards (lecture seule) et administrateurs (gestion des utilisateurs, import de données).
+## Installation
 
-Indicateurs : Création, lecture, filtrage (par date, zone, type) et pagination des données.
+### Cloner le dépôt
 
-Statistiques : Calcul de moyennes et analyse de la qualité de l'air sur des périodes données.
-
-Ingestion : Scripts automatisés pour la récupération de données depuis des API tierces.
-
-Frontend (Dashboard)
-Visualisation des indicateurs sous forme de cartes.
-
-Interface d'administration pour la gestion des comptes utilisateurs.
-
-Déclenchement manuel de la synchronisation des données externes.
-
-Prérequis
-Python 3.8 ou version supérieure.
-
-pip (gestionnaire de paquets Python).
-
-Un navigateur web moderne pour l'accès au dashboard.
-
-Installation
-Suivez les étapes ci-dessous pour configurer l'environnement de développement.
-
-Cloner le dépôt
-
-```Bash
-
+``` bash
 git clone https://github.com/votre-username/ecotrack.git
-cd ecotrack
-Créer un environnement virtuel
+cd Projet-API-Eco-Track
 ```
-```Bash
 
+### Créer un environnement virtuel
+
+``` bash
 # Windows
 python -m venv venv
 venv\Scripts\activate
@@ -96,101 +94,84 @@ venv\Scripts\activate
 # Linux / MacOS
 python3 -m venv venv
 source venv/bin/activate
-Installer les dépendances
 ```
-```Bash
+
+### Installer les dépendances
+
+``` bash
 pip install -r requirements.txt
-Initialiser la base de données Ce script crée les tables nécessaires et configure le compte administrateur par défaut.
 ```
-```Bash
+
+### Initialiser la base de données
+
+``` bash
 python scripts/init_db.py
-(Optionnel) Peupler la base de données Pour récupérer les données météorologiques et de qualité de l'air initiales :
 ```
-```Bash
+
+### (Optionnel) Peupler la base de données
+
+``` bash
 python scripts/data_ingestion.py
-Utilisation
-Démarrage du serveur
-Lancez le serveur API avec la commande suivante :
 ```
-```Bash
+
+## Utilisation
+
+### Démarrage du serveur
+
+``` bash
 uvicorn app.main:app --reload
 ```
-L'API sera accessible à l'adresse : http://127.0.0.1:8000
 
-Accès au Dashboard
-Ouvrez le fichier frontend/index.html dans votre navigateur.
+API : http://127.0.0.1:8000
 
-Identifiants par défaut (Admin) :
+### Accès au Dashboard
 
-Email : admin@ecotrack.com
-
+Identifiants Admin :\
+Email : admin@ecotrack.com\
 Mot de passe : admin123
 
-Ces identifiants sont générés par le script scripts/init_db.py.
-
-Documentation de l'API
-Une documentation interactive (Swagger UI) est générée automatiquement par FastAPI. Une fois le serveur lancé, elle est accessible à l'adresse suivante :
+## Documentation de l'API
 
 http://127.0.0.1:8000/docs
 
-Principaux points de terminaison (Endpoints)
-Auth : /auth/login, /auth/register
+### Endpoints
 
-Indicateurs : /indicators/ (GET, POST)
+-   Auth : /auth/login, /auth/register
+-   Indicateurs : /indicators/ (GET, POST)
+-   Zones : /zones/ (GET)
+-   Statistiques : /stats/air/averages
+-   Administration : /admin/users/
 
-Zones : /zones/ (GET)
+## Sources de données
 
-Statistiques : /stats/air/averages
+-   Open-Meteo
+-   WAQI
+-   Data.gouv.fr / ADEME
 
-Administration : /admin/users/
+## Structure du projet
 
-Sources de données
-Les données environnementales proviennent des sources suivantes, intégrées via le script d'ingestion :
+    .
+    ├── README.md
+    ├── app
+    │   ├── __init__.py
+    │   ├── auth.py
+    │   ├── core
+    │   ├── crud.py
+    │   ├── database.py
+    │   ├── main.py
+    │   ├── models.py
+    │   ├── routes.py
+    │   └── schemas.py
+    ├── data
+    │   └── ecotrack.db
+    ├── frontend
+    │   ├── css
+    │   ├── index.html
+    │   └── js
+    ├── requirements.txt
+    └── scripts
 
-Open-Meteo : Données météorologiques (Température, Vent, Humidité).
+## Auteurs et Licence
 
-WAQI (World Air Quality Index) : Données de qualité de l'air (PM2.5, PM10, NO2).
-
-Data.gouv.fr / ADEME : Données simulées pour la consommation énergétique et les émissions de CO2.
-
-Structure du projet
-```Plaintext
-.
-├── README.md                   # Documentation du projet
-├── app                         # Code source principal de l'API Backend
-│   ├── __init__.py
-│   ├── auth.py                 # Gestion de l'authentification et tokens JWT
-│   ├── core                    # Configuration du cœur de l'application
-│   │   ├── __init__.py
-│   │   └── config.py           # Variables d'environnement et paramètres
-│   ├── crud.py                 # Opérations de base de données (Create, Read, Update, Delete)
-│   ├── database.py             # Configuration de la connexion SQLAlchemy
-│   ├── main.py                 # Point d'entrée de l'application FastAPI
-│   ├── models.py               # Définition des modèles de données (Tables)
-│   ├── routes.py               # Définition des endpoints et routeurs API
-│   └── schemas.py              # Schémas Pydantic pour la validation des données
-├── data
-│   └── ecotrack.db             # Fichier de base de données SQLite
-├── frontend                    # Interface utilisateur web
-│   ├── css
-│   │   └── style.css           # Feuilles de style pour le dashboard
-│   ├── index.html              # Page principale unique (Single Page App)
-│   └── js
-│       ├── admin.js            # Logique de gestion des utilisateurs (admin)
-│       ├── app.js              # Configuration globale et utilitaires JS
-│       ├── auth.js             # Gestion de la connexion et inscription
-│       ├── dashboard.js        # Logique d'affichage des indicateurs
-│       ├── data-ingestion.js   # Gestion du déclenchement de l'ingestion
-│       └── filters.js          # Logique de filtrage (dates, zones)
-├── requirements.txt            # Liste des dépendances Python
-└── scripts                     # Scripts utilitaires pour la gestion du projet
-    ├── __init__.py
-    ├── check_database.py       # Script de diagnostic de la base de données
-    ├── data_ingestion.py       # Script backend de récupération des API externes
-    ├── init_db.py              # Script d'initialisation (création tables + admin)
-    └── test.py                 # Script de test rapide
-```
-Auteurs et Licence
-Ce projet a été développé dans le cadre d'un cursus universitaire.
-
+Ce projet a été développé dans le cadre d'un cursus universitaire.\
 Licence : MIT License
