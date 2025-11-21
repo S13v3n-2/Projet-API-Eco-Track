@@ -19,6 +19,13 @@ class UserLogin(BaseModel):
     password: str
 
 
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    is_active: Optional[bool] = None
+    role: Optional[str] = None
+
+
 class User(UserBase):
     id: int
 
@@ -84,3 +91,14 @@ class AirAveragesResponse(BaseModel):
     average_quality: float
     period: str
     data_points: int
+
+
+class AirQualityStats(BaseModel):
+    type: str
+    average: float
+    count: int
+    min: float
+    max: float
+
+    class Config:
+        from_attributes = True
